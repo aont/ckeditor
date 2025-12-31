@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CKEditor 5 Debug RTE</title>
+
+  <link rel="stylesheet" href="./ckeditor5-47.3.0/ckeditor5/ckeditor5.css" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif; margin: 0; background: #f6f7f9; }
+    header { padding: 12px 16px; background: #fff; border-bottom: 1px solid #e6e8ee; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    header h1 { margin: 0; font-size: 14px; font-weight: 600; }
+    #status { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid #d7dbe6; background:#fff; }
+    .wrap { display: grid; grid-template-columns: 1fr 520px; gap: 12px; padding: 12px; max-width: 1400px; margin: 0 auto; }
+    .card { background: #fff; border: 1px solid #e6e8ee; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.03); overflow:hidden; }
+    .card h2 { margin: 0; padding: 10px 12px; font-size: 12px; border-bottom: 1px solid #e6e8ee; color: #333; }
+    .card .content { padding: 12px; }
+    #editor { min-height: 320px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    button { border: 1px solid #d7dbe6; background: #fff; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    button.primary { background: #111827; border-color: #111827; color: #fff; }
+    button.danger { border-color: #ef4444; color:#b91c1c; }
+    textarea { width: 100%; min-height: 220px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 12px; }
+    .hint { font-size: 12px; color: #667085; line-height: 1.5; margin-top: 8px; }
+    @media (max-width: 1100px) { .wrap { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CKEditor 5 Debug RTE</h1>
+    <div id="status">Status: booting...</div>
+  </header>
+
+  <div class="wrap">
+    <section class="card">
+      <h2>Editor</h2>
+      <div class="content">
+        <div class="actions">
+          <button id="btnSave" class="primary">保存（localStorage）</button>
+          <button id="btnLoad">読込（localStorage）</button>
+          <button id="btnToHtml">HTMLへ反映（右側）</button>
+          <button id="btnClear" class="danger">クリア</button>
+        </div>
+
+        <div id="editor">
+          <p>ここに入力できれば初期化は成功です。</p>
+        </div>
+
+        <p class="hint">
+          入力できない場合は DevTools Console を確認してください（licenseKey 不備が最多）。
+        </p>
+      </div>
+    </section>
+
+    <aside class="card">
+      <h2>HTML</h2>
+      <div class="content">
+        <div class="actions">
+          <button id="btnCopy">HTMLをコピー</button>
+          <button id="btnDownload">HTMLをダウンロード</button>
+          <button id="btnFromHtml">エディタへ読み込み</button>
+        </div>
+
+        <textarea id="htmlOutput" placeholder="ここに editor.getData() を表示します"></textarea>
+      </div>
+    </aside>
+  </div>
+
+  <script src="./ckeditor5-47.3.0/ckeditor5/ckeditor5.umd.js"></script>
+
+  <script>
+    // ===== ユーティリティ =====
+    const $ = (sel) => document.querySelector(sel);
+    const statusEl = $('#status');
+
+    function setStatus(text) {
+      statusEl.textContent = 'Status: ' + text;
+    }
+
+    function log(level, msg, obj) {
+      const t = new Date().toISOString();
+      const line = `[${t}] [${level}] ${msg}`;
+      if (level === 'ERROR') console.error(line, obj || '');
+      else if (level === 'WARN') console.warn(line, obj || '');
+      else console.log(line, obj || '');
+    }
+
+    window.addEventListener('error', (e) => {
+      log('ERROR', `window.onerror: ${e.message}`, {
+        source: e.filename,
+        lineno: e.lineno,
+        colno: e.colno
+      });
+      setStatus('window error');
+    });
+
+    window.addEventListener('unhandledrejection', (e) => {
+      log('ERROR', 'unhandledrejection', e.reason);
+      setStatus('unhandled rejection');
+    });
+
+    // ===== 設定 =====
+    const LICENSE_KEY = 'GPL'; // 実運用では正しいキーに変更
+    const STORAGE_KEY = 'rte:ckeditor5:content:v1';
+    const AUTOSAVE_DEBOUNCE_MS = 700;
+
+    let editor;
+
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...args), ms);
+      };
+    }
+
+    function saveToStorage() {
+      if (!editor) return;
+      const data = editor.getData();
+      localStorage.setItem(STORAGE_KEY, data);
+      log('INFO', 'Saved to localStorage', { bytes: data.length });
+    }
+
+    function loadFromStorage() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      log('INFO', 'Loaded from localStorage', {
+        exists: data != null,
+        bytes: data ? data.length : 0
+      });
+      if (data && editor) editor.setData(data);
+    }
+
+    function clearAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      $('#htmlOutput').value = '';
+      if (editor) editor.setData('<p></p>');
+      log('INFO', 'Cleared editor + localStorage');
+    }
+
+    function toHtmlPanel() {
+      if (!editor) return;
+      const html = editor.getData();
+      $('#htmlOutput').value = html;
+      log('INFO', 'Exported HTML', { bytes: html.length });
+    }
+
+    function fromHtmlPanel() {
+      if (!editor) return;
+      const html = $('#htmlOutput').value || '<p></p>';
+      editor.setData(html);
+      log('INFO', 'Imported HTML', { bytes: html.length });
+    }
+
+    function downloadHtml(filename, content) {
+      const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      log('INFO', 'Downloaded HTML', { filename });
+    }
+
+    const autosave = debounce(saveToStorage, AUTOSAVE_DEBOUNCE_MS);
+
+    // ===== CKEditor 初期化 =====
+    (async () => {
+      try {
+        setStatus('loading');
+        log('INFO', 'Boot', { hasCKEDITOR: !!window.CKEDITOR });
+
+        const {
+          ClassicEditor,
+          Essentials,
+          Paragraph,
+          Bold,
+          Italic,
+          Heading,
+          Link,
+          List
+        } = CKEDITOR;
+
+        editor = await ClassicEditor.create($('#editor'), {
+          licenseKey: LICENSE_KEY,
+          plugins: [Essentials, Paragraph, Bold, Italic, Heading, Link, List],
+          toolbar: [
+            'undo', 'redo', '|',
+            'heading', '|',
+            'bold', 'italic', '|',
+            'link', 'bulletedList', 'numberedList'
+          ]
+        });
+
+        setStatus('ready');
+        log('INFO', 'Editor ready');
+
+        loadFromStorage();
+
+        editor.model.document.on('change:data', () => {
+          log('INFO', 'change:data');
+          autosave();
+        });
+
+      } catch (err) {
+        setStatus('init failed');
+        log('ERROR', 'CKEditor init failed', err);
+        alert('CKEditor の初期化に失敗しました。Console を確認してください。');
+      }
+    })();
+
+    // ===== UI =====
+    $('#btnSave').addEventListener('click', saveToStorage);
+    $('#btnLoad').addEventListener('click', loadFromStorage);
+    $('#btnToHtml').addEventListener('click', toHtmlPanel);
+    $('#btnClear').addEventListener('click', clearAll);
+    $('#btnFromHtml').addEventListener('click', fromHtmlPanel);
+
+    $('#btnCopy').addEventListener('click', async () => {
+      toHtmlPanel();
+      await navigator.clipboard.writeText($('#htmlOutput').value || '');
+      log('INFO', 'Copied HTML to clipboard');
+    });
+
+    $('#btnDownload').addEventListener('click', () => {
+      toHtmlPanel();
+      downloadHtml('content.html', $('#htmlOutput').value || '');
+    });
+  </script>
+</body>
+</html>
