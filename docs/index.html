@@ -7,225 +7,304 @@
 
   <link rel="stylesheet" href="./ckeditor5-47.3.0/ckeditor5/ckeditor5.css" />
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif; margin: 0; background: #f6f7f9; }
-    header { padding: 12px 16px; background: #fff; border-bottom: 1px solid #e6e8ee; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    header h1 { margin: 0; font-size: 14px; font-weight: 600; }
-    #status { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid #d7dbe6; background:#fff; }
-    .wrap { display: grid; grid-template-columns: 1fr 520px; gap: 12px; padding: 12px; max-width: 1400px; margin: 0 auto; }
-    .card { background: #fff; border: 1px solid #e6e8ee; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.03); overflow:hidden; }
-    .card h2 { margin: 0; padding: 10px 12px; font-size: 12px; border-bottom: 1px solid #e6e8ee; color: #333; }
-    .card .content { padding: 12px; }
-    #editor { min-height: 320px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-    button { border: 1px solid #d7dbe6; background: #fff; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-    button.primary { background: #111827; border-color: #111827; color: #fff; }
-    button.danger { border-color: #ef4444; color:#b91c1c; }
-    textarea { width: 100%; min-height: 220px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 12px; }
-    .hint { font-size: 12px; color: #667085; line-height: 1.5; margin-top: 8px; }
-    @media (max-width: 1100px) { .wrap { grid-template-columns: 1fr; } }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif;
+      margin: 0;
+      background: #f6f7f9;
+    }
+
+    header {
+      padding: 12px 16px;
+      background: #fff;
+      border-bottom: 1px solid #e6e8ee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    #status {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #d7dbe6;
+      background: #fff;
+    }
+
+    .wrap {
+      padding: 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e6e8ee;
+      border-radius: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.03);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      margin: 0;
+      padding: 10px 12px;
+      font-size: 12px;
+      border-bottom: 1px solid #e6e8ee;
+      color: #333;
+    }
+
+    .card .content {
+      padding: 12px;
+    }
+
+    #editor {
+      min-height: 320px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      border: 1px solid #d7dbe6;
+      background: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    button.primary {
+      background: #111827;
+      border-color: #111827;
+      color: #fff;
+    }
+
+    button.danger {
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    iframe {
+      width: 100%;
+      min-height: 240px;
+      border: 1px solid #e6e8ee;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #667085;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>CKEditor 5 Debug RTE</h1>
-    <div id="status">Status: booting...</div>
-  </header>
+<header>
+  <h1>CKEditor 5 Debug RTE</h1>
+  <div id="status">Status: booting...</div>
+</header>
 
-  <div class="wrap">
-    <section class="card">
-      <h2>Editor</h2>
-      <div class="content">
-        <div class="actions">
-          <button id="btnSave" class="primary">保存（localStorage）</button>
-          <button id="btnLoad">読込（localStorage）</button>
-          <button id="btnToHtml">HTMLへ反映（右側）</button>
-          <button id="btnClear" class="danger">クリア</button>
-        </div>
-
-        <div id="editor">
-          <p>ここに入力できれば初期化は成功です。</p>
-        </div>
-
-        <p class="hint">
-          入力できない場合は DevTools Console を確認してください（licenseKey 不備が最多）。
-        </p>
+<div class="wrap">
+  <!-- Editor -->
+  <section class="card">
+    <h2>Editor</h2>
+    <div class="content">
+      <div class="actions">
+        <button id="btnSave" class="primary">保存（localStorage）</button>
+        <button id="btnLoad">読込（localStorage）</button>
+        <button id="btnToHtml">HTMLへ反映（下）</button>
+        <button id="btnClear" class="danger">クリア</button>
       </div>
-    </section>
 
-    <aside class="card">
-      <h2>HTML</h2>
-      <div class="content">
-        <div class="actions">
-          <button id="btnCopy">HTMLをコピー</button>
-          <button id="btnDownload">HTMLをダウンロード</button>
-          <button id="btnFromHtml">エディタへ読み込み</button>
-        </div>
-
-        <textarea id="htmlOutput" placeholder="ここに editor.getData() を表示します"></textarea>
+      <div id="editor">
+        <p>ここに入力できれば初期化は成功です。</p>
       </div>
-    </aside>
-  </div>
 
-  <script src="./ckeditor5-47.3.0/ckeditor5/ckeditor5.umd.js"></script>
+      <p class="hint">
+        入力できない場合は DevTools Console を確認してください（licenseKey 不備が最多）。
+      </p>
+    </div>
+  </section>
 
-  <script>
-    // ===== ユーティリティ =====
-    const $ = (sel) => document.querySelector(sel);
-    const statusEl = $('#status');
+  <!-- HTML Text -->
+  <section class="card">
+    <h2>HTML</h2>
+    <div class="content">
+      <div class="actions">
+        <button id="btnCopy">HTMLをコピー</button>
+        <button id="btnDownload">HTMLをダウンロード</button>
+        <button id="btnFromHtml">エディタへ読み込み</button>
+      </div>
 
-    function setStatus(text) {
-      statusEl.textContent = 'Status: ' + text;
-    }
+      <textarea id="htmlOutput" placeholder="ここに editor.getData() を表示します"></textarea>
+    </div>
+  </section>
 
-    function log(level, msg, obj) {
-      const t = new Date().toISOString();
-      const line = `[${t}] [${level}] ${msg}`;
-      if (level === 'ERROR') console.error(line, obj || '');
-      else if (level === 'WARN') console.warn(line, obj || '');
-      else console.log(line, obj || '');
-    }
+  <!-- Preview -->
+  <section class="card">
+    <h2>Preview</h2>
+    <div class="content">
+      <iframe id="htmlPreview" sandbox="allow-same-origin"></iframe>
+    </div>
+  </section>
+</div>
 
-    window.addEventListener('error', (e) => {
-      log('ERROR', `window.onerror: ${e.message}`, {
-        source: e.filename,
-        lineno: e.lineno,
-        colno: e.colno
+<script src="./ckeditor5-47.3.0/ckeditor5/ckeditor5.umd.js"></script>
+
+<script>
+  const $ = (sel) => document.querySelector(sel);
+  const statusEl = $('#status');
+
+  function setStatus(text) {
+    statusEl.textContent = 'Status: ' + text;
+  }
+
+  const LICENSE_KEY = 'GPL';
+  const STORAGE_KEY = 'rte:ckeditor5:content:v1';
+  const AUTOSAVE_DEBOUNCE_MS = 700;
+
+  let editor;
+
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+  }
+
+  function updatePreview(html) {
+    const iframe = $('#htmlPreview');
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }
+
+  function saveToStorage() {
+    if (!editor) return;
+    localStorage.setItem(STORAGE_KEY, editor.getData());
+  }
+
+  function loadFromStorage() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data && editor) editor.setData(data);
+  }
+
+  function clearAll() {
+    localStorage.removeItem(STORAGE_KEY);
+    $('#htmlOutput').value = '';
+    updatePreview('');
+    if (editor) editor.setData('<p></p>');
+  }
+
+  function toHtmlPanel() {
+    if (!editor) return;
+    const html = editor.getData();
+    $('#htmlOutput').value = html;
+    updatePreview(html);
+  }
+
+  function fromHtmlPanel() {
+    if (!editor) return;
+    const html = $('#htmlOutput').value || '<p></p>';
+    editor.setData(html);
+    updatePreview(html);
+  }
+
+  function downloadHtml(filename, content) {
+    const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const autosave = debounce(saveToStorage, AUTOSAVE_DEBOUNCE_MS);
+
+  (async () => {
+    try {
+      setStatus('loading');
+
+      const {
+        ClassicEditor,
+        Essentials,
+        Paragraph,
+        Bold,
+        Italic,
+        Heading,
+        Link,
+        List
+      } = CKEDITOR;
+
+      editor = await ClassicEditor.create($('#editor'), {
+        licenseKey: LICENSE_KEY,
+        plugins: [Essentials, Paragraph, Bold, Italic, Heading, Link, List],
+        toolbar: [
+          'undo', 'redo', '|',
+          'heading', '|',
+          'bold', 'italic', '|',
+          'link', 'bulletedList', 'numberedList'
+        ]
       });
-      setStatus('window error');
-    });
 
-    window.addEventListener('unhandledrejection', (e) => {
-      log('ERROR', 'unhandledrejection', e.reason);
-      setStatus('unhandled rejection');
-    });
+      setStatus('ready');
+      loadFromStorage();
+      toHtmlPanel();
 
-    // ===== 設定 =====
-    const LICENSE_KEY = 'GPL'; // 実運用では正しいキーに変更
-    const STORAGE_KEY = 'rte:ckeditor5:content:v1';
-    const AUTOSAVE_DEBOUNCE_MS = 700;
-
-    let editor;
-
-    function debounce(fn, ms) {
-      let t;
-      return (...args) => {
-        clearTimeout(t);
-        t = setTimeout(() => fn(...args), ms);
-      };
-    }
-
-    function saveToStorage() {
-      if (!editor) return;
-      const data = editor.getData();
-      localStorage.setItem(STORAGE_KEY, data);
-      log('INFO', 'Saved to localStorage', { bytes: data.length });
-    }
-
-    function loadFromStorage() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      log('INFO', 'Loaded from localStorage', {
-        exists: data != null,
-        bytes: data ? data.length : 0
+      editor.model.document.on('change:data', () => {
+        autosave();
       });
-      if (data && editor) editor.setData(data);
+
+    } catch (err) {
+      setStatus('init failed');
+      console.error(err);
+      alert('CKEditor の初期化に失敗しました。');
     }
+  })();
 
-    function clearAll() {
-      localStorage.removeItem(STORAGE_KEY);
-      $('#htmlOutput').value = '';
-      if (editor) editor.setData('<p></p>');
-      log('INFO', 'Cleared editor + localStorage');
-    }
+  $('#btnSave').addEventListener('click', saveToStorage);
+  $('#btnLoad').addEventListener('click', loadFromStorage);
+  $('#btnToHtml').addEventListener('click', toHtmlPanel);
+  $('#btnClear').addEventListener('click', clearAll);
+  $('#btnFromHtml').addEventListener('click', fromHtmlPanel);
 
-    function toHtmlPanel() {
-      if (!editor) return;
-      const html = editor.getData();
-      $('#htmlOutput').value = html;
-      log('INFO', 'Exported HTML', { bytes: html.length });
-    }
+  $('#btnCopy').addEventListener('click', async () => {
+    toHtmlPanel();
+    await navigator.clipboard.writeText($('#htmlOutput').value || '');
+  });
 
-    function fromHtmlPanel() {
-      if (!editor) return;
-      const html = $('#htmlOutput').value || '<p></p>';
-      editor.setData(html);
-      log('INFO', 'Imported HTML', { bytes: html.length });
-    }
+  $('#btnDownload').addEventListener('click', () => {
+    toHtmlPanel();
+    downloadHtml('content.html', $('#htmlOutput').value || '');
+  });
 
-    function downloadHtml(filename, content) {
-      const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-      log('INFO', 'Downloaded HTML', { filename });
-    }
-
-    const autosave = debounce(saveToStorage, AUTOSAVE_DEBOUNCE_MS);
-
-    // ===== CKEditor 初期化 =====
-    (async () => {
-      try {
-        setStatus('loading');
-        log('INFO', 'Boot', { hasCKEDITOR: !!window.CKEDITOR });
-
-        const {
-          ClassicEditor,
-          Essentials,
-          Paragraph,
-          Bold,
-          Italic,
-          Heading,
-          Link,
-          List
-        } = CKEDITOR;
-
-        editor = await ClassicEditor.create($('#editor'), {
-          licenseKey: LICENSE_KEY,
-          plugins: [Essentials, Paragraph, Bold, Italic, Heading, Link, List],
-          toolbar: [
-            'undo', 'redo', '|',
-            'heading', '|',
-            'bold', 'italic', '|',
-            'link', 'bulletedList', 'numberedList'
-          ]
-        });
-
-        setStatus('ready');
-        log('INFO', 'Editor ready');
-
-        loadFromStorage();
-
-        editor.model.document.on('change:data', () => {
-          log('INFO', 'change:data');
-          autosave();
-        });
-
-      } catch (err) {
-        setStatus('init failed');
-        log('ERROR', 'CKEditor init failed', err);
-        alert('CKEditor の初期化に失敗しました。Console を確認してください。');
-      }
-    })();
-
-    // ===== UI =====
-    $('#btnSave').addEventListener('click', saveToStorage);
-    $('#btnLoad').addEventListener('click', loadFromStorage);
-    $('#btnToHtml').addEventListener('click', toHtmlPanel);
-    $('#btnClear').addEventListener('click', clearAll);
-    $('#btnFromHtml').addEventListener('click', fromHtmlPanel);
-
-    $('#btnCopy').addEventListener('click', async () => {
-      toHtmlPanel();
-      await navigator.clipboard.writeText($('#htmlOutput').value || '');
-      log('INFO', 'Copied HTML to clipboard');
-    });
-
-    $('#btnDownload').addEventListener('click', () => {
-      toHtmlPanel();
-      downloadHtml('content.html', $('#htmlOutput').value || '');
-    });
-  </script>
+  $('#htmlOutput').addEventListener('input', (e) => {
+    updatePreview(e.target.value);
+  });
+</script>
 </body>
 </html>
