@@ -29,6 +29,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download CKEditor5 zip
+        run: |
+          curl -L -o ckeditor5-47.4.0.zip https://cdn.ckeditor.com/ckeditor5/47.4.0/zip/ckeditor5-47.4.0.zip
+
+      - name: Unzip CKEditor5 into public/
+        run: |
+          unzip -o ckeditor5-47.4.0.zip -d public
+
       # Upload public/ as-is as the Pages site artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
